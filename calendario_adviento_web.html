@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎄 Calendario de Adviento - Expresiones Navideñas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .calendar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .day-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .day-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+        }
+
+        .day-box.opened {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        }
+
+        .day-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .day-box.opened .day-number {
+            color: #d63031;
+        }
+
+        .gift-icon {
+            font-size: 3em;
+            margin: 10px 0;
+        }
+
+        .day-label {
+            font-size: 0.9em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #666;
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #667eea;
+        }
+
+        .modal-header h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .expression-title {
+            font-size: 1.8em;
+            color: #d63031;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-content {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .task-section {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .task-section .section-title {
+            color: #856404;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .progress {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .calendar-container {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+            }
+            
+            .modal-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎄 Calendario de Adviento Navideño 🎄</h1>
+        <p>Descubre una expresión española cada día</p>
+    </div>
+
+    <div class="calendar-container" id="calendar"></div>
+
+    <div class="progress" id="progress"></div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">×</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const expressions = [
+            {
+                day: 1,
+                expression: "Estar de fiesta",
+                meaning: "Celebrar o estar de humor festivo.",
+                example: "Todo el barrio está de fiesta porque han puesto las luces navideñas en las calles.",
+                culture: "En España y Latinoamérica, desde principios de diciembre las ciudades se transforman con decoraciones, y el ambiente festivo se siente en todos lados.",
+                task: "Describe una situación en tu ciudad o país cuando la gente \"está de fiesta\" durante diciembre. ¿Qué hacen? ¿Cómo se nota?"
+            },
+            {
+                day: 2,
+                expression: "Ser más bueno que el pan",
+                meaning: "Ser una persona muy bondadosa y generosa.",
+                example: "Mi abuela es más buena que el pan, siempre prepara comida extra para los vecinos en Navidad.",
+                culture: "El pan es un alimento básico y esencial en la cultura hispana, símbolo de bondad y generosidad. Esta expresión se usa mucho en Navidad para destacar la generosidad de las personas.",
+                task: "Escribe sobre alguien que conoces que sea \"más bueno que el pan\". ¿Qué hace esa persona que demuestra su bondad?"
+            },
+            {
+                day: 3,
+                expression: "Pasar las Navidades en familia",
+                meaning: "Celebrar estas fechas con los seres queridos.",
+                example: "Este año vamos a pasar las Navidades en familia en casa de mis padres, como siempre.",
+                culture: "En el mundo hispano, la familia es el centro de las celebraciones navideñas. Las reuniones familiares son sagradas, y muchas personas viajan largas distancias para estar juntos.",
+                task: "¿Cómo pasas tú las Navidades normalmente? ¿Con quién te reúnes y qué hacen juntos?"
+            },
+            {
+                day: 4,
+                expression: "Tener el espíritu navideño",
+                meaning: "Estar lleno de alegría, generosidad y buenos sentimientos propios de la época.",
+                example: "María tiene mucho espíritu navideño este año: ha decorado toda su casa y ya compró regalos para todos.",
+                culture: "El \"espíritu navideño\" incluye la decoración, la música, la generosidad y la alegría. En países hispanos se manifiesta también en villancicos, aguinaldos y actos de caridad.",
+                task: "¿Qué cosas te ayudan a ti a tener el espíritu navideño? Menciona al menos 3 actividades o tradiciones."
+            },
+            {
+                day: 5,
+                expression: "Poner el belén",
+                meaning: "Montar el nacimiento o pesebre navideño.",
+                example: "Cada 8 de diciembre ponemos el belén en el salón, es una tradición familiar.",
+                culture: "En España especialmente, el belén es una tradición muy arraigada. Muchas familias tienen figuras que pasan de generación en generación. Algunos pueblos crean belenes vivientes con personas reales.",
+                task: "¿Existe una tradición similar en tu país? Si pones decoraciones navideñas, ¿cuál es la primera que colocas?"
+            },
+            {
+                day: 6,
+                expression: "Las fiestas están a la vuelta de la esquina",
+                meaning: "Las celebraciones están muy cerca, están por llegar.",
+                example: "¡No puedo creer que las fiestas estén a la vuelta de la esquina! Todavía no he comprado ningún regalo.",
+                culture: "Esta expresión refleja la mezcla de emoción y estrés que muchos sienten en diciembre con los preparativos de última hora.",
+                task: "Completa la frase: \"Cuando las fiestas están a la vuelta de la esquina, yo siempre...\""
+            },
+            {
+                day: 7,
+                expression: "Brillar como un árbol de Navidad",
+                meaning: "Estar muy arreglado o llevar muchas joyas/adornos brillantes.",
+                example: "Ana llegó a la cena de empresa brillando como un árbol de Navidad, con su vestido de lentejuelas y todas sus joyas.",
+                culture: "Las fiestas de empresa y cenas navideñas son ocasiones para vestirse elegantemente. Esta expresión se usa con humor para describir a alguien muy adornado.",
+                task: "Describe cómo te gusta vestirte para las celebraciones navideñas. ¿Prefieres brillar como un árbol de Navidad o algo más discreto?"
+            },
+            {
+                day: 8,
+                expression: "Hacer las paces",
+                meaning: "Reconciliarse con alguien, resolver un conflicto.",
+                example: "La Navidad es buen momento para hacer las paces con las personas con las que hemos discutido.",
+                culture: "La Navidad es vista como época de perdón y reconciliación. Muchas familias aprovechan estas fechas para resolver conflictos del año.",
+                task: "¿Crees que es importante \"hacer las paces\" en Navidad? ¿Por qué sí o por qué no?"
+            },
+            {
+                day: 9,
+                expression: "Año Nuevo, vida nueva",
+                meaning: "Expresa el deseo de cambiar y mejorar con el nuevo año.",
+                example: "Ya dejé de fumar y empecé el gimnasio: año nuevo, vida nueva.",
+                culture: "Este refrán popular refleja el optimismo con el que se recibe el año nuevo en toda Hispanoamérica. Es el momento de los propósitos y nuevos comienzos.",
+                task: "¿Qué significa para ti \"año nuevo, vida nueva\"? ¿Hay algo que quieras cambiar?"
+            },
+            {
+                day: 10,
+                expression: "Comerse las uvas / Tomar las uvas",
+                meaning: "Comer las 12 uvas en Nochevieja al ritmo de las campanadas del reloj.",
+                example: "A medianoche nos comimos las uvas mientras sonaban las campanadas de la Puerta del Sol.",
+                culture: "Esta es una tradición española que se ha extendido a Latinoamérica. Las 12 uvas representan 12 deseos para los 12 meses del año. En España, millones ven las campanadas de la Puerta del Sol de Madrid por TV.",
+                task: "¿Conocías esta tradición? ¿Qué tradición especial tienen en tu país para recibir el Año Nuevo?"
+            },
+            {
+                day: 11,
+                expression: "Tener un corazón de oro",
+                meaning: "Ser muy generoso y bondadoso.",
+                example: "El dueño de la tienda tiene un corazón de oro: cada Navidad regala juguetes a los niños del barrio.",
+                culture: "La generosidad es un valor muy asociado con la Navidad. Muchas personas y empresas realizan actos de caridad en estas fechas.",
+                task: "Cuenta una historia de alguien que conoces o has visto que tenga \"un corazón de oro\"."
+            },
+            {
+                day: 12,
+                expression: "Estar como unas Pascuas",
+                meaning: "Estar muy alegre y contento.",
+                example: "Desde que llegaron los nietos, mi madre está como unas Pascuas.",
+                culture: "\"Pascuas\" se refiere a festividades religiosas importantes. La expresión compara la alegría de alguien con la felicidad de las celebraciones.",
+                task: "¿Qué cosas te ponen \"como unas Pascuas\" durante las fiestas? Menciona al menos dos."
+            },
+            {
+                day: 13,
+                expression: "No todo el monte es orégano",
+                meaning: "No todo es fácil o agradable, hay dificultades.",
+                example: "Las fiestas son bonitas, pero no todo el monte es orégano: también hay gastos, estrés y discusiones familiares.",
+                culture: "Este refrán recuerda que incluso en épocas felices hay desafíos. En Navidad, el estrés de los preparativos, gastos y reuniones puede ser agobiante.",
+                task: "¿Cuál es la parte menos divertida de las fiestas para ti? Explica por qué \"no todo el monte es orégano\" en Navidad."
+            },
+            {
+                day: 14,
+                expression: "Hacer buenas migas con alguien",
+                meaning: "Llevarse bien con alguien, tener buena relación.",
+                example: "En la cena de Nochebuena conocí al novio de mi prima y enseguida hicimos buenas migas.",
+                culture: "Las reuniones navideñas a menudo incluyen conocer nuevos miembros de la familia o amigos. Esta expresión viene de \"migas\", un plato tradicional español que requiere mezclar bien los ingredientes.",
+                task: "¿Con qué tipo de personas haces tú buenas migas fácilmente? Describe las cualidades que buscas."
+            },
+            {
+                day: 15,
+                expression: "De Nochebuena a Año Nuevo, todo es jolgorio y jaleo",
+                meaning: "Estas fechas están llenas de celebraciones y alboroto.",
+                example: "De Nochebuena a Año Nuevo, todo es jolgorio y jaleo: fiestas, comidas, brindis... ¡no paramos!",
+                culture: "Este refrán captura perfectamente la intensidad de las festividades. \"Jolgorio\" es diversión ruidosa y \"jaleo\" es bullicio. Entre el 24 de diciembre y el 1 de enero hay celebraciones casi diarias.",
+                task: "Describe cómo son estos días en tu familia. ¿Es verdad que todo es \"jolgorio y jaleo\"?"
+            },
+            {
+                day: 16,
+                expression: "Más vale tarde que nunca",
+                meaning: "Mejor hacer algo con retraso que no hacerlo.",
+                example: "Compré el regalo el 24 por la tarde. Bueno, más vale tarde que nunca.",
+                culture: "Este refrán es muy útil durante las compras navideñas de última hora, algo común en la cultura hispana donde muchos dejan todo para el último momento.",
+                task: "¿Eres de los que prepara todo con anticipación o de los que dice \"más vale tarde que nunca\"? Cuenta una anécdota."
+            },
+            {
+                day: 17,
+                expression: "Echar la casa por la ventana",
+                meaning: "Gastar mucho dinero en una celebración.",
+                example: "Este año mis padres echaron la casa por la ventana y organizaron una gran fiesta de Navidad con todos los amigos.",
+                culture: "En las fiestas navideñas es común que las familias gasten más de lo habitual en comida, decoración y regalos. Esta expresión refleja esa generosidad y exceso característicos de la época.",
+                task: "¿En qué ocasión echarías tú \"la casa por la ventana\"? ¿Vale la pena hacerlo en Navidad?"
+            },
+            {
+                day: 18,
+                expression: "Estar en la gloria",
+                meaning: "Estar muy feliz y cómodo.",
+                example: "Después de la cena navideña, sentado en el sofá con mi familia, estaba en la gloria.",
+                culture: "Esta expresión refleja esos momentos de plenitud que muchos sienten durante las reuniones familiares, especialmente después de una buena comida.",
+                task: "Describe un momento en las fiestas en el que tú estés o hayas estado \"en la gloria\"."
+            },
+            {
+                day: 19,
+                expression: "Quedar en familia",
+                meaning: "Reunirse solo con los familiares cercanos, celebrar de forma íntima.",
+                example: "Este año la Nochebuena va a quedar en familia, solo nosotros, nada de amigos.",
+                culture: "Aunque muchas celebraciones son grandes, también hay un valor especial en las reuniones íntimas. Algunas familias prefieren la tranquilidad de estar solo entre ellos.",
+                task: "¿Prefieres que las celebraciones queden en familia o te gusta incluir amigos? ¿Por qué?"
+            },
+            {
+                day: 20,
+                expression: "A Dios rogando y con el mazo dando",
+                meaning: "Hay que pedir deseos pero también esforzarse para conseguirlos.",
+                example: "Quiero aprobar todos los exámenes en enero: a Dios rogando y con el mazo dando, ¡a estudiar!",
+                culture: "Este refrán es perfecto para los propósitos de Año Nuevo. No basta con desear, hay que trabajar por ello. Refleja la mentalidad práctica de la cultura hispana.",
+                task: "Escribe un propósito de Año Nuevo y explica cómo vas \"a Dios rogando y con el mazo dando\" para cumplirlo."
+            },
+            {
+                day: 21,
+                expression: "Hacer el amigo invisible",
+                meaning: "Juego navideño de intercambio de regalos secreto.",
+                example: "En la oficina hicimos el amigo invisible y me tocó comprarle un regalo a Carlos.",
+                culture: "Esta tradición es muy popular en España y Latinoamérica en ámbitos laborales y grupos de amigos. Cada persona sortea un nombre en secreto y le compra un regalo a esa persona, evitando así tener que comprar para todos.",
+                task: "¿Has participado alguna vez en un amigo invisible? Cuenta tu experiencia o, si no, ¿te gustaría participar? ¿Por qué?"
+            },
+            {
+                day: 22,
+                expression: "Por si las moscas",
+                meaning: "Por precaución, por si acaso.",
+                example: "Voy a comprar un regalo extra, por si las moscas viene alguien inesperado a la cena.",
+                culture: "Esta expresión coloquial refleja la hospitalidad hispana y la tendencia a querer estar preparado para cualquier situación, especialmente en fiestas.",
+                task: "¿Qué haces tú \"por si las moscas\" durante las fiestas? Menciona una precaución que siempre tomas."
+            },
+            {
+                day: 23,
+                expression: "Dar las uvas",
+                meaning: "(Coloquial) Llegar muy tarde, demorarse muchísimo.",
+                example: "¡Marcos siempre da las uvas! Dijimos a las 8 y llegó a las 10 de la noche.",
+                culture: "Esta expresión hace referencia a las 12 uvas de medianoche, sugiriendo que alguien tarda tanto que ya es Año Nuevo. Es una forma humorística de criticar la impuntualidad.",
+                task: "¿Eres puntual o tiendes a \"dar las uvas\"? Cuenta una situación divertida relacionada con la puntualidad en las fiestas."
+            },
+            {
+                day: 24,
+                expression: "La Nochebuena se viene, la Nochebuena se va",
+                meaning: "Refleja lo rápido que pasan estas fechas especiales.",
+                example: "La Nochebuena se viene, la Nochebuena se va, y nosotros nos iremos y no volveremos más... ¡Qué rápido pasó todo!",
+                culture: "Esta es una frase de un villancico tradicional español que muchos conocen. Expresa cierta nostalgia por lo efímero de las celebraciones.",
+                task: "¿Sientes que las fiestas pasan muy rápido? ¿Qué haces para disfrutar cada momento?"
+            },
+            {
+                day: 25,
+                expression: "Felices fiestas",
+                meaning: "Deseo de felicidad para todas las celebraciones de temporada.",
+                example: "Os deseo a todos felices fiestas y que el próximo año venga cargado de cosas buenas.",
+                culture: "Esta es una expresión inclusiva que engloba todas las celebraciones de diciembre y principios de enero. Es una forma respetuosa de felicitar sin especificar una celebración religiosa concreta.",
+                task: "Escribe un mensaje original deseando \"felices fiestas\" a tus compañeros de clase."
+            },
+            {
+                day: 26,
+                expression: "Estar hasta arriba",
+                meaning: "Estar muy ocupado o muy lleno (de trabajo, comida, etc.).",
+                example: "Después de la comida de Navidad estoy hasta arriba, no puedo comer ni un polvorón más.",
+                culture: "Esta expresión es muy común durante las fiestas, tanto para referirse al exceso de comida como al exceso de actividades sociales y familiares.",
+                task: "¿De qué sueles estar \"hasta arriba\" durante las fiestas? Puede ser de comida, trabajo, reuniones..."
+            },
+            {
+                day: 27,
+                expression: "Entrar con buen pie",
+                meaning: "Comenzar algo de manera favorable.",
+                example: "Quiero entrar con buen pie en el Año Nuevo: haciendo ejercicio y comiendo sano desde el día 1.",
+                culture: "Existe la superstición en muchos países hispanos de que cómo comiences el año es cómo lo continuarás. Por eso muchos se esfuerzan por \"entrar con buen pie\".",
+                task: "¿Qué harás tú para \"entrar con buen pie\" en el Año Nuevo? Describe tus planes para el 1 de enero."
+            },
+            {
+                day: 28,
+                expression: "Hacer borrón y cuenta nueva",
+                meaning: "Olvidar el pasado y empezar de cero.",
+                example: "Este año tuve muchos problemas, pero en enero haré borrón y cuenta nueva.",
+                culture: "El Año Nuevo simboliza un nuevo comienzo en la cultura hispana. Es momento de perdonar, olvidar lo malo y renovar esperanzas. Esta actitud optimista es fundamental en las celebraciones.",
+                task: "¿Hay algo del año pasado de lo que quieras \"hacer borrón y cuenta nueva\"? No hace falta que sea muy personal, puede ser un hábito o actitud."
+            },
+            {
+                day: 29,
+                expression: "Esperar a los Reyes Magos",
+                meaning: "Referencia a la tradición del 6 de enero cuando los niños reciben regalos.",
+                example: "Los niños están emocionados esperando a los Reyes Magos, ya escribieron su carta.",
+                culture: "En España y muchos países latinoamericanos, los Reyes Magos (Melchor, Gaspar y Baltasar) son quienes traen los regalos el 6 de enero, no Santa Claus el 25 de diciembre. Los niños dejan sus zapatos y agua para los camellos.",
+                task: "¿Quién trae los regalos en tu cultura: Santa Claus, los Reyes Magos u otro personaje? Describe esa tradición."
+            },
+            {
+                day: 30,
+                expression: "Hacerse buenos propósitos",
+                meaning: "Plantearse objetivos y metas para mejorar.",
+                example: "Me hice buenos propósitos para el año nuevo: aprender español, leer más y viajar.",
+                culture: "Los propósitos de Año Nuevo son una tradición universal, pero en el mundo hispano se toman muy en serio, a menudo compartiéndolos en las cenas de fin de año.",
+                task: "Escribe tres buenos propósitos para el próximo año relacionados con el aprendizaje del español."
+            },
+            {
+                day: 31,
+                expression: "¡Feliz Año Nuevo! / ¡Próspero Año Nuevo!",
+                meaning: "Deseos tradicionales para el año que comienza.",
+                example: "¡Feliz y próspero Año Nuevo para todos! Que se cumplan todos vuestros sueños.",
+                culture: "Estas expresiones se dicen justo después de las campanadas de medianoche. En muchos países hispanos se abraza a todos los presentes y se brindan con champán o sidra. También hay tradiciones como usar ropa interior roja o amarilla, comer lentejas, o dar la vuelta a la manzana con maletas para atraer viajes.",
+                task: "Escribe un mensaje de Año Nuevo a tu profesor/a de español agradeciéndole por este año de aprendizaje y usando al menos 3 de las expresiones que has aprendido este mes."
+            }
+        ];
+
+        let openedDays = JSON.parse(localStorage.getItem('openedDays') || '[]');
+
+        function createCalendar() {
+            const calendar = document.getElementById('calendar');
+            expressions.forEach(expr => {
+                const dayBox = document.createElement('div');
+                dayBox.className = 'day-box';
+                if (openedDays.includes(expr.day)) {
+                    dayBox.classList.add('opened');
+                }
+                
+                dayBox.innerHTML = `
+                    <div class="day-number">${expr.day}</div>
+                    <div class="gift-icon">${openedDays.includes(expr.day) ? '✅' : '🎁'}</div>
+                    <div class="day-label">Diciembre</div>
+                `;
+                
+                dayBox.onclick = () => openDay(expr);
+                calendar.appendChild(dayBox);
+            });
+            
+            updateProgress();
+        }
+
+        function openDay(expr) {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h2>🎁 Día ${expr.day} de Diciembre</h2>
+                </div>
+                
+                <div class="expression-title">"${expr.expression}"</div>
+                
+                <div class="section">
+                    <div class="section-title">📖 Significado</div>
+                    <div class="section-content">${expr.meaning}</div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">💬 Ejemplo</div>
+                    <div class="section-content">"${expr.example}"</div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">🌍 Contexto Cultural</div>
+                    <div class="section-content">${expr.culture}</div>
+                </div>
+                
+                <div class="section task-section">
+                    <div class="section-title">✍️ Tu Tarea</div>
+                    <div class="section-content">${expr.task}</div>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+            
+            if (!openedDays.includes(expr.day)) {
+                openedDays.push(expr.day);
+                localStorage.setItem('openedDays', JSON.stringify(openedDays));
+                
+                const boxes = document.querySelectorAll('.day-box');
+                boxes[expr.day - 1].classList.add('opened');
+                boxes[expr.day - 1].querySelector('.gift-icon').textContent = '✅';
+                
+                updateProgress();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function updateProgress() {
+            const progress = document.getElementById('progress');
+            const total = expressions.length;
+            const opened = openedDays.length;
+            progress.innerHTML = `📊 Progreso: ${opened} de ${total} días abiertos (${Math.round(opened/total*100)}%)`;
+        }
+
+        document.addEventListener('DOMContentLoaded', createCalendar);
+        
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
