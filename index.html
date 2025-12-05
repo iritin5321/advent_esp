@@ -505,24 +505,33 @@
             }
         ];
 
-        let openedDays = JSON.parse(localStorage.getItem('openedDays') || '[]');
+        let openedDays = [];
+
+        try {
+            const stored = localStorage.getItem('openedDays');
+            if (stored) {
+                openedDays = JSON.parse(stored);
+            }
+        } catch (e) {
+            console.log('LocalStorage no disponible');
+        }
 
         function createCalendar() {
             const calendar = document.getElementById('calendar');
-            expressions.forEach(expr => {
+            expressions.forEach(function(expr) {
                 const dayBox = document.createElement('div');
                 dayBox.className = 'day-box';
                 if (openedDays.includes(expr.day)) {
                     dayBox.classList.add('opened');
                 }
                 
-                dayBox.innerHTML = `
-                    <div class="day-number">${expr.day}</div>
-                    <div class="gift-icon">${openedDays.includes(expr.day) ? '✅' : '🎁'}</div>
-                    <div class="day-label">Diciembre</div>
-                `;
+                dayBox.innerHTML = '<div class="day-number">' + expr.day + '</div>' +
+                    '<div class="gift-icon">' + (openedDays.includes(expr.day) ? '✅' : '🎁') + '</div>' +
+                    '<div class="day-label">Diciembre</div>';
                 
-                dayBox.onclick = () => openDay(expr);
+                dayBox.onclick = function() {
+                    openDay(expr);
+                };
                 calendar.appendChild(dayBox);
             });
             
@@ -533,39 +542,36 @@
             const modal = document.getElementById('modal');
             const modalContent = document.getElementById('modalContent');
             
-            modalContent.innerHTML = `
-                <div class="modal-header">
-                    <h2>🎁 Día ${expr.day} de Diciembre</h2>
-                </div>
-                
-                <div class="expression-title">"${expr.expression}"</div>
-                
-                <div class="section">
-                    <div class="section-title">📖 Significado</div>
-                    <div class="section-content">${expr.meaning}</div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-title">💬 Ejemplo</div>
-                    <div class="section-content">"${expr.example}"</div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-title">🌍 Contexto Cultural</div>
-                    <div class="section-content">${expr.culture}</div>
-                </div>
-                
-                <div class="section task-section">
-                    <div class="section-title">✍️ Tu Tarea</div>
-                    <div class="section-content">${expr.task}</div>
-                </div>
-            `;
+            modalContent.innerHTML = '<div class="modal-header">' +
+                '<h2>🎁 Día ' + expr.day + ' de Diciembre</h2>' +
+                '</div>' +
+                '<div class="expression-title">"' + expr.expression + '"</div>' +
+                '<div class="section">' +
+                '<div class="section-title">📖 Significado</div>' +
+                '<div class="section-content">' + expr.meaning + '</div>' +
+                '</div>' +
+                '<div class="section">' +
+                '<div class="section-title">💬 Ejemplo</div>' +
+                '<div class="section-content">"' + expr.example + '"</div>' +
+                '</div>' +
+                '<div class="section">' +
+                '<div class="section-title">🌍 Contexto Cultural</div>' +
+                '<div class="section-content">' + expr.culture + '</div>' +
+                '</div>' +
+                '<div class="section task-section">' +
+                '<div class="section-title">✍️ Tu Tarea</div>' +
+                '<div class="section-content">' + expr.task + '</div>' +
+                '</div>';
             
             modal.classList.add('active');
             
             if (!openedDays.includes(expr.day)) {
                 openedDays.push(expr.day);
-                localStorage.setItem('openedDays', JSON.stringify(openedDays));
+                try {
+                    localStorage.setItem('openedDays', JSON.stringify(openedDays));
+                } catch (e) {
+                    console.log('No se pudo guardar en localStorage');
+                }
                 
                 const boxes = document.querySelectorAll('.day-box');
                 boxes[expr.day - 1].classList.add('opened');
@@ -583,13 +589,24 @@
             const progress = document.getElementById('progress');
             const total = expressions.length;
             const opened = openedDays.length;
-            progress.innerHTML = `📊 Progreso: ${opened} de ${total} días abiertos (${Math.round(opened/total*100)}%)`;
+            const percentage = Math.round((opened / total) * 100);
+            progress.innerHTML = '📊 Progreso: ' + opened + ' de ' + total + ' días abiertos (' + percentage + '%)';
         }
 
-        document.addEventListener('DOMContentLoaded', createCalendar);
-        
-        document.getElementById('modal').addEventListener('click', (e) => {
-            if (e.target.id === 'modal') {
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
                 closeModal();
             }
         });
+
+        createCalendar();
+    </script>
+</body>
+</html>
