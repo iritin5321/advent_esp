@@ -38,40 +38,54 @@
         }
 
         .calendar-container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            padding: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            gap: 10px;
+            padding: 15px;
         }
 
         .day-box {
             background: white;
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 12px 8px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .day-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+        .day-box:hover:not(.locked) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.2);
         }
 
         .day-box.opened {
             background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
         }
 
+        .day-box.locked {
+            background: #e0e0e0;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .day-box.locked .day-number {
+            color: #999;
+        }
+
         .day-number {
-            font-size: 2.5em;
+            font-size: 1.8em;
             font-weight: bold;
             color: #667eea;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .day-box.opened .day-number {
@@ -79,15 +93,15 @@
         }
 
         .gift-icon {
-            font-size: 3em;
-            margin: 10px 0;
+            font-size: 2em;
+            margin: 5px 0;
         }
 
         .day-label {
-            font-size: 0.9em;
+            font-size: 0.7em;
             color: #666;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .modal {
@@ -222,16 +236,52 @@
 
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 1.8em;
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 1em;
             }
             
             .calendar-container {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                gap: 10px;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                padding: 10px;
+            }
+
+            .day-box {
+                min-height: 85px;
+                padding: 8px 5px;
+            }
+
+            .day-number {
+                font-size: 1.5em;
+            }
+
+            .gift-icon {
+                font-size: 1.5em;
+            }
+
+            .day-label {
+                font-size: 0.6em;
             }
             
             .modal-content {
-                padding: 30px 20px;
+                padding: 25px 15px;
+                max-height: 85vh;
+            }
+
+            .modal-header h2 {
+                font-size: 1.5em;
+            }
+
+            .expression-title {
+                font-size: 1.4em;
+            }
+
+            .section {
+                padding: 15px;
+                margin-bottom: 15px;
             }
         }
     </style>
@@ -516,22 +566,58 @@
             console.log('LocalStorage no disponible');
         }
 
+        function getCurrentDay() {
+            const now = new Date();
+            const month = now.getMonth();
+            const day = now.getDate();
+            
+            if (month === 11) {
+                return day;
+            }
+            return 0;
+        }
+
+        function isDayAvailable(day) {
+            const currentDay = getCurrentDay();
+            return day <= currentDay;
+        }
+
         function createCalendar() {
             const calendar = document.getElementById('calendar');
             expressions.forEach(function(expr) {
                 const dayBox = document.createElement('div');
                 dayBox.className = 'day-box';
-                if (openedDays.includes(expr.day)) {
+                
+                const isAvailable = isDayAvailable(expr.day);
+                const isOpened = openedDays.includes(expr.day);
+                
+                if (isOpened) {
                     dayBox.classList.add('opened');
+                } else if (!isAvailable) {
+                    dayBox.classList.add('locked');
+                }
+                
+                let icon = '🎁';
+                if (isOpened) {
+                    icon = '✅';
+                } else if (!isAvailable) {
+                    icon = '🔒';
                 }
                 
                 dayBox.innerHTML = '<div class="day-number">' + expr.day + '</div>' +
-                    '<div class="gift-icon">' + (openedDays.includes(expr.day) ? '✅' : '🎁') + '</div>' +
+                    '<div class="gift-icon">' + icon + '</div>' +
                     '<div class="day-label">Diciembre</div>';
                 
-                dayBox.onclick = function() {
-                    openDay(expr);
-                };
+                if (isAvailable) {
+                    dayBox.onclick = function() {
+                        openDay(expr);
+                    };
+                } else {
+                    dayBox.onclick = function() {
+                        alert('🔒 Este día aún no está disponible. Vuelve el ' + expr.day + ' de diciembre.');
+                    };
+                }
+                
                 calendar.appendChild(dayBox);
             });
             
